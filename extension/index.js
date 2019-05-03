@@ -9,11 +9,13 @@ function setDate(format) {
 
 async function main() {
     let config;
-    if (localStorage.hasOwnProperty("config")) {
-        config = JSON.parse(localStorage.config);
-    } else {
-        config = await (await fetch("config.json")).json();
-    }
+    // if (localStorage.hasOwnProperty("config")) {
+    //     config = JSON.parse(localStorage.config);
+    // } else {
+    //     config = await (await fetch("config.json")).json();
+    // }
+    let res = await browser.storage.local.get();
+    config = JSON.stringify(res) !== "{}" ? res : await (await fetch("config.json")).json();
 
     // change date/time
     let bound = setDate.bind(null, config.dateformat);
