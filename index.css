@@ -1,0 +1,35 @@
+body {
+    margin: 10%;
+    font-family: monospace;
+    font-size: 20px;
+}
+
+#box {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+#sites {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+a {
+    display: flex;
+    color: inherit;
+    flex-grow: 1;
+    text-decoration: none;
+    border: 1px solid;
+    justify-content: center;
+    margin: 10px 20px 10px 20px;
+    padding: 5px;
+}
+
+#settings {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 5px;
+}
