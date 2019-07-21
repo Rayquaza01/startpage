@@ -1,43 +1,68 @@
-/* globals moment */
+/* globals RSSParser, moment */
+const cptitle = document.getElementById("cptitle");
+const cpdesc = document.getElementById("cpdesc");
+const time = document.getElementById("time");
 const date = document.getElementById("date");
-const text = document.getElementById("text");
-const sites = document.getElementById("sites");
+const feed = document.getElementById("feed");
+const CORS = "https://cors-anywhere.herokuapp.com/";
 
-function setDate(format) {
-    date.innerText = moment().format(format);
+function updateTime() {
+    time.innerText = moment().format("hh:mm");
+    date.innerText = moment().format("MMMM Do, YYYY");
+}
+
+function fillFeed(item, index) {
+    // only display 20 items
+    if (index > 19) {
+        return;
+    }
+    let ele = document.createElement("span");
+    ele.className = "item";
+
+    let name = document.createElement("a");
+    name.className = "title";
+    name.href = item.link;
+    name.innerText = item.title;
+    if (item.hasOwnProperty("creator")) {
+        name.innerText += " • " + item.creator;
+    }
+
+    ele.appendChild(name);
+    feed.appendChild(ele);
 }
 
 async function main() {
-    let config;
-    if (localStorage.hasOwnProperty("config")) {
-        config = JSON.parse(localStorage.config);
+    // get image from bing
+    let info = await (await fetch(
+        CORS + "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US"
+    )).json();
+    document.body.style.background = "url(https://bing.com" + info.images[0].url + ")";
+    cptitle.innerText = info.images[0].title;
+    cpdesc.innerText = info.images[0].copyright;
+
+    // update clock
+    updateTime();
+    setInterval(updateTime, 1000);
+
+    // get rss feed
+    let parser = new RSSParser();
+    let feedURL;
+    if (!localStorage.hasOwnProperty("feed")) {
+        feedURL = "https://reddit.com/r/popular/.rss";
     } else {
-        config = await (await fetch("config.json")).json();
+        feedURL = localStorage.feed;
     }
-
-    // change date/time
-    let bound = setDate.bind(null, config.dateformat);
-    bound();
-    setInterval(bound, 1000);
-
-    let hour = moment().hour();
-    // set mode to day if hour is within day range
-    let mode = hour >= config.day[0] && hour <= config.day[1] ? "day" : "night";
-    document.body.style.color = config.colorscheme[mode].fg;
-    document.body.style.backgroundColor = config.colorscheme[mode].bg;
-
-    text.innerText = config.text[mode];
-
-    // add style options for pseudoclasses
-    document.styleSheets[0].insertRule(`#text:first-letter { color: ${config.colorscheme[mode].bg}; background-color: ${config.colorscheme[mode].fg}; }`);
-    document.styleSheets[0].insertRule(`a:hover { color: ${config.colorscheme[mode].bg}; background-color: ${config.colorscheme[mode].fg}; }`);
-
-    config.sites.forEach(item => {
-        let link = document.createElement("a");
-        link.innerText = item[0];
-        link.href = item[1];
-        sites.appendChild(link);
-    });
+    let feed = await parser.parseURL(CORS +feedURL);
+    feed.items.forEach(fillFeed);
 }
 
+function changeRSSFeed() {
+    let feed = prompt("New RSS Feed:");
+    if (feed !== null) {
+        localStorage.feed = feed;
+        location.reload();
+    }
+}
+
+document.getElementById("changeFeed").addEventListener("click", changeRSSFeed);
 document.addEventListener("DOMContentLoaded", main);
