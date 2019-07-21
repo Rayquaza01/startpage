@@ -36,7 +36,8 @@ async function main() {
     let info = await (await fetch(
         CORS + "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US"
     )).json();
-    document.body.style.background = "url(https://bing.com" + info.images[0].url + ")";
+    console.log(info.images[0].url)
+    document.body.style.background = "url(" + CORS + "https://bing.com" + info.images[0].url + ")";
     cptitle.innerText = info.images[0].title;
     cpdesc.innerText = info.images[0].copyright;
 
