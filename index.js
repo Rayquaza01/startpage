@@ -1,6 +1,5 @@
 /* globals moment RSSParser */
 const feedEle = document.getElementById("feed");
-const CORS = "https://cors-anywhere.herokuapp.com/";
 const COLORS = [
     "#F44336",
     "#E91E63",
@@ -12,23 +11,23 @@ const COLORS = [
     "#00BCD4",
     "#009688",
     "#4CAF50",
-    "#8BC34A",
-    "#CDDC39",
-    "#FFEB3B",
-    "#FFC107",
-    "#FF9800",
+    // "#8BC34A",
+    // "#CDDC39",
+    // "#FFEB3B",
+    // "#FFC107",
+    // "#FF9800",
     "#FF5722",
     "#795548",
-    "#9E9E9E",
+    // "#9E9E9E",
     "#607D8B"
-];
+]; // material design colors, colors that white text doesn't look good on removed
 
-function fillFeed(item, index) {
-    // only display 20 items
-    if (index > 19) {
-        return;
-    }
+function changeColor() {
+    document.body.style.backgroundColor =
+        COLORS[Math.floor(Math.random() * COLORS.length)];
+}
 
+function fillFeed(item) {
     let name = document.createElement("a");
     name.className = "item";
     name.href = item.link;
@@ -41,14 +40,13 @@ function fillFeed(item, index) {
 }
 
 function changeTime() {
-    document.getElementById("t").innerText = moment().format("hh:mm A")
-    document.getElementById("d").innerText = moment().format("dddd, MMMM Do, YYYY")
+    document.getElementById("t").innerText = moment().format("hh:mm A");
+    document.getElementById("d").innerText = moment().format("dddd, MMMM Do, YYYY");
 }
 
 async function main() {
     // set color
-    document.body.style.backgroundColor =
-        COLORS[Math.floor(Math.random() * COLORS.length)];
+    changeColor();
 
     // change time
     changeTime();
@@ -56,12 +54,13 @@ async function main() {
 
     // get rss feed
     let parser = new RSSParser();
-    let feedURL;
-    if (!localStorage.hasOwnProperty("feed")) {
-        feedURL = "https://reddit.com/r/popular/.rss";
-    } else {
-        feedURL = localStorage.feed;
-    }
+    // use cors proxy on web demo
+    let CORS = !window.hasOwnProperty("browser")
+        ? "https://cors-anywhere.herokuapp.com/"
+        : "";
+    let feedURL = !localStorage.hasOwnProperty("feed")
+        ? "https://reddit.com/r/popular/.rss"
+        : localStorage.feed;
     let feed = await parser.parseURL(CORS + feedURL);
     feed.items.forEach(fillFeed);
 }
@@ -75,8 +74,11 @@ function changeRSSFeed() {
 }
 
 function shortcuts(e) {
-    if (e.key === "c") {
+    if (e.key === "r") {
         changeRSSFeed();
+    }
+    if (e.key === "c") {
+        changeColor();
     }
 }
 

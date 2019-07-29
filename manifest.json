@@ -7,7 +7,7 @@
             "id": "{7b0a350e-b9c0-4d99-be54-9015bc40679d}"
         }
     },
-    "permissions": ["storage"],
+    "permissions": ["<all_urls>"],
     "chrome_url_overrides": {
         "newtab": "index.html"
     }
