@@ -79,22 +79,4 @@ async function main() {
     feed.items.forEach(fillFeed);
 }
 
-function changeRSSFeed() {
-    let feed = prompt("New RSS Feed:");
-    if (feed !== null) {
-        localStorage.feed = feed;
-        location.reload();
-    }
-}
-
-function shortcuts(e) {
-    if (e.key === "r") {
-        changeRSSFeed();
-    }
-    if (e.key === "c") {
-        changeColor();
-    }
-}
-
 document.addEventListener("DOMContentLoaded", main);
-document.addEventListener("keydown", shortcuts);
