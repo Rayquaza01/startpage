@@ -1,6 +1,7 @@
 body {
     font-family: 'Roboto', sans-serif;
     color: white;
+    background-color: #212121;
     user-select: none;
     -moz-user-select: none;
     overflow: hidden;

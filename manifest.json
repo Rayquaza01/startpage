@@ -7,9 +7,16 @@
             "id": "{7b0a350e-b9c0-4d99-be54-9015bc40679d}"
         }
     },
-    "permissions": ["<all_urls>"],
+    "permissions": ["<all_urls>", "storage"],
     "chrome_url_overrides": {
         "newtab": "index.html"
+    },
+    "background": {
+        "scripts": ["bg.js"]
+    },
+    "options_ui": {
+        "page": "options.html",
+        "browser_style": true
     }
 }
 

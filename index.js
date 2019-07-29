@@ -1,30 +1,9 @@
 /* globals moment RSSParser */
 const feedEle = document.getElementById("feed");
-const COLORS = [
-    "#F44336",
-    "#E91E63",
-    "#9C27B0",
-    "#673AB7",
-    "#3F51B5",
-    "#2196F3",
-    "#03A9F4",
-    "#00BCD4",
-    "#009688",
-    "#4CAF50",
-    // "#8BC34A",
-    // "#CDDC39",
-    // "#FFEB3B",
-    // "#FFC107",
-    // "#FF9800",
-    "#FF5722",
-    "#795548",
-    // "#9E9E9E",
-    "#607D8B"
-]; // material design colors, colors that white text doesn't look good on removed
 
-function changeColor() {
+function changeColor(colors) {
     document.body.style.backgroundColor =
-        COLORS[Math.floor(Math.random() * COLORS.length)];
+        colors[Math.floor(Math.random() * colors.length)];
 }
 
 function fillFeed(item) {
@@ -39,18 +18,55 @@ function fillFeed(item) {
     feedEle.appendChild(name);
 }
 
-function changeTime() {
-    document.getElementById("t").innerText = moment().format("hh:mm A");
-    document.getElementById("d").innerText = moment().format("dddd, MMMM Do, YYYY");
+function changeTime(time, date) {
+    document.getElementById("t").innerText = moment().format(time);
+    document.getElementById("d").innerText = moment().format(date);
+}
+
+async function getOpt(opt) {
+    if (window.hasOwnProperty("browser")) {
+        let res = await browser.storage.local.get(opt);
+        return res[opt];
+    } else {
+        if (["colors", "shuffle"].includes(opt)) {
+            return JSON.parse(localStorage[opt]);
+        } else {
+            return localStorage[opt];
+        }
+    }
 }
 
 async function main() {
+    // for web demo
+    if (!window.hasOwnProperty("browser")) {
+        console.log("WEB DEMO");
+        console.log("Change settings in browser console");
+        console.log("Ex: localStorage.feed = 'https://reddit.com/r/popular/.rss'");
+        let storage = await (await fetch("options.json")).json();
+        if (localStorage !== null) {
+            localStorage.colors = JSON.stringify(storage.colors);
+            localStorage.feed = storage.feed;
+            localStorage.date = storage.date;
+            localStorage.time = storage.time;
+            localStorage.shuffle = storage.shuffle;
+        }
+    }
+
     // set color
-    changeColor();
+    let colors = await getOpt("colors");
+    let shuffle = await getOpt("shuffle");
+    changeColor(colors);
+    // change color every 5s if shuffle is enabled
+    if (shuffle) {
+        setInterval(changeColor.bind(null, colors), 5000);
+        document.body.style.transition = "5s";
+    }
 
     // change time
-    changeTime();
-    setInterval(changeTime, 1000);
+    let date = await getOpt("date");
+    let time = await getOpt("time");
+    changeTime(time, date);
+    setInterval(changeTime.bind(null, time, date), 1000);
 
     // get rss feed
     let parser = new RSSParser();
@@ -58,9 +74,7 @@ async function main() {
     let CORS = !window.hasOwnProperty("browser")
         ? "https://cors-anywhere.herokuapp.com/"
         : "";
-    let feedURL = !localStorage.hasOwnProperty("feed")
-        ? "https://reddit.com/r/popular/.rss"
-        : localStorage.feed;
+    let feedURL = await getOpt("feed");
     let feed = await parser.parseURL(CORS + feedURL);
     feed.items.forEach(fillFeed);
 }
