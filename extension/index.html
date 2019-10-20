@@ -2,17 +2,17 @@
 <html>
     <head>
         <title>Startpage</title>
+        <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet"> 
         <link rel="stylesheet" type="text/css" href="index.css">
         <meta charset="utf-8">
     </head>
     <body>
-        <div id="box">
-            <span id="text"></span>
-            <span id="date"></span>
+        <div id="time">
+            <span id="t">12:00 AM</span>
+            <span id="d">Thursday, January 1, 1970</span>
         </div>
-        <hr>
-        <div id="sites"></div>
-        <a id="settings" href="config.html">⚙️</a>
+        <div id="feed"></div>
+        <script src="rss-parser.min.js"></script>
         <script src="moment.js"></script>
         <script src="index.js"></script>
     </body>

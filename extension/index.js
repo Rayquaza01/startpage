@@ -1,45 +1,82 @@
-/* globals moment */
-const date = document.getElementById("date");
-const text = document.getElementById("text");
-const sites = document.getElementById("sites");
+/* globals moment RSSParser */
+const feedEle = document.getElementById("feed");
 
-function setDate(format) {
-    date.innerText = moment().format(format);
+function changeColor(colors) {
+    document.body.style.backgroundColor =
+        colors[Math.floor(Math.random() * colors.length)];
+}
+
+function fillFeed(item) {
+    let name = document.createElement("a");
+    name.className = "item";
+    name.href = item.link;
+    name.innerText = item.title;
+    if (item.hasOwnProperty("creator")) {
+        name.innerText += " • " + item.creator;
+    }
+
+    feedEle.appendChild(name);
+}
+
+function changeTime(time, date) {
+    document.getElementById("t").innerText = moment().format(time);
+    document.getElementById("d").innerText = moment().format(date);
+}
+
+async function getOpt(opt) {
+    if (window.hasOwnProperty("browser")) {
+        let res = await browser.storage.local.get(opt);
+        return res[opt];
+    } else {
+        if (["colors", "shuffle"].includes(opt)) {
+            return JSON.parse(localStorage[opt]);
+        } else {
+            return localStorage[opt];
+        }
+    }
 }
 
 async function main() {
-    let config;
-    // if (localStorage.hasOwnProperty("config")) {
-    //     config = JSON.parse(localStorage.config);
-    // } else {
-    //     config = await (await fetch("config.json")).json();
-    // }
-    let res = await browser.storage.local.get();
-    config = JSON.stringify(res) !== "{}" ? res : await (await fetch("config.json")).json();
+    // for web demo
+    if (!window.hasOwnProperty("browser")) {
+        console.log("WEB DEMO");
+        console.log("Change settings in browser console");
+        console.log("Ex: localStorage.feed = 'https://reddit.com/r/popular/.rss'");
+        let storage = await (await fetch("options.json")).json();
+        if (localStorage !== null) {
+            localStorage.colors = JSON.stringify(storage.colors);
+            localStorage.feed = storage.feed;
+            localStorage.date = storage.date;
+            localStorage.time = storage.time;
+            localStorage.shuffle = storage.shuffle;
+        }
+    }
 
-    // change date/time
-    let bound = setDate.bind(null, config.dateformat);
-    bound();
-    setInterval(bound, 1000);
+    // set color
+    let colors = await getOpt("colors");
+    let shuffle = await getOpt("shuffle");
+    changeColor(colors);
+    // change color every 5s if shuffle is enabled
+    if (shuffle) {
+        setInterval(changeColor.bind(null, colors), 5000);
+        document.body.style.transition = "5s";
+    }
 
-    let hour = moment().hour();
-    // set mode to day if hour is within day range
-    let mode = hour >= config.day[0] && hour <= config.day[1] ? "day" : "night";
-    document.body.style.color = config.colorscheme[mode].fg;
-    document.body.style.backgroundColor = config.colorscheme[mode].bg;
+    // change time
+    let date = await getOpt("date");
+    let time = await getOpt("time");
+    changeTime(time, date);
+    setInterval(changeTime.bind(null, time, date), 1000);
 
-    text.innerText = config.text[mode];
-
-    // add style options for pseudoclasses
-    document.styleSheets[0].insertRule(`#text:first-letter { color: ${config.colorscheme[mode].bg}; background-color: ${config.colorscheme[mode].fg}; }`);
-    document.styleSheets[0].insertRule(`a:hover { color: ${config.colorscheme[mode].bg}; background-color: ${config.colorscheme[mode].fg}; }`);
-
-    config.sites.forEach(item => {
-        let link = document.createElement("a");
-        link.innerText = item[0];
-        link.href = item[1];
-        sites.appendChild(link);
-    });
+    // get rss feed
+    let parser = new RSSParser();
+    // use cors proxy on web demo
+    let CORS = !window.hasOwnProperty("browser")
+        ? "https://cors-anywhere.herokuapp.com/"
+        : "";
+    let feedURL = await getOpt("feed");
+    let feed = await parser.parseURL(CORS + feedURL);
+    feed.items.forEach(fillFeed);
 }
 
 document.addEventListener("DOMContentLoaded", main);

@@ -1,14 +1,22 @@
 {
     "manifest_version": 2,
     "name": "Personal Start Page",
-    "version": "2.0.0",
+    "version": "3.0.2",
     "applications": {
         "gecko": {
             "id": "{7b0a350e-b9c0-4d99-be54-9015bc40679d}"
         }
     },
-    "permissions": ["storage"],
+    "permissions": ["<all_urls>", "storage"],
     "chrome_url_overrides": {
         "newtab": "index.html"
+    },
+    "background": {
+        "scripts": ["bg.js"]
+    },
+    "options_ui": {
+        "page": "options.html",
+        "browser_style": true
     }
 }
+
