@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <link rel="stylesheet" type="text/css" href="options.css">
         <meta charset="utf-8">
     </head>
     <body>
@@ -15,11 +16,14 @@
         <input type="text" id="time" placeholder="Time">
         <input type="text" id="date" placeholder="Date">
         <h2>RSS</h2>
+        <input type="text" id="feed" placeholder="Feed">
         Feed Mode: <select id="feedMode">
             <option value="rss">RSS</option>
-            <option value="fever">Fever</option>
+            <option value="freshrss">FreshRSS</option>
         </select>
-        <input type="text" id="feed" placeholder="Feed">
+        <h2>FreshRSS</h2>
+        <a href="https://freshrss.org">FreshRSS</a> is a self hosted RSS aggregator. If you are using a FreshRSS feed above, you can have items be marked as read in FreshRSS when opened from the startpage. Select FreshRSS as the Feed Mode and fill out the Fever API info below to use it.
+        See <a href="https://freshrss.github.io/FreshRSS/en/users/06_Fever_API.html">FreshRSS - Fever API implementation</a> for help with getting the Fever API info.
         <h2>Fever API</h2>
         <input type="text" id="fever-endpoint" placeholder="Fever Endpoint">
         <input type="text" id="fever-api_key" placeholder="Fever API Key">

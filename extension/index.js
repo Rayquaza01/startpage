@@ -8,36 +8,48 @@ function changeColor(colors) {
         colors[Math.floor(Math.random() * colors.length)];
 }
 
-async function markReadAndOpenFever(e) {
+async function openItem(e) {
+    if (hasProperty(e.target.dataset, "freshrssId")) {
+        await markRead(e.target.dataset.freshrssId);
+    }
+    switch (e.which) {
+        case 1:
+            location.href = e.target.dataset.url;
+            break;
+        case 2:
+            browser.tabs.create({
+                url: e.target.dataset.url,
+                active: true
+            });
+            break;
+    }
+    e.target.remove();
+}
+
+async function markRead(id) {
     let res = await browser.storage.local.get("fever");
     await feverRequest(
         res.fever.endpoint,
         res.fever.api_key,
-        "mark=item&as=read&id=" + e.target.dataset.id
+        "mark=item&as=read&id=" + id
     );
-    location.href = e.target.dataset.url;
 }
 
-function fillFeed(item) {
-    let name = document.createElement("a");
+function fillFeed(mode = "rss", item) {
+    let name = document.createElement("div");
 
-    if (hasProperty(item, "feed_id")) {
-        name.className = "item";
-        name.dataset.id = item.id;
-        name.dataset.url = item.url;
-        name.innerText = item.title;
-        if (item.author !== "") {
-            name.innerText += " • " + item.author.substring(1);
-        }
-        name.addEventListener("click", markReadAndOpenFever);
-    } else {
-        name.className = "item";
-        name.href = item.link;
-        name.innerText = item.title;
-        if (hasProperty(item, "creator")) {
-            name.innerText += " • " + item.creator;
-        }
+    name.className = "item";
+    name.innerText = item.title;
+    name.dataset.url = item.link;
+    name.title = item.link;
+    name.href = "#";
+    if (hasProperty(item, "creator")) {
+        name.innerText += " • " + item.creator;
     }
+    if (mode === "freshrss") {
+        name.dataset.freshrssId = item.guid;
+    }
+    name.addEventListener("mouseup", openItem);
 
     feedEle.appendChild(name);
 }
@@ -78,18 +90,10 @@ async function main() {
     setInterval(changeTime.bind(null, time, date), 1000);
 
     // get rss feed
-    if (res.feedMode === "rss") {
-        let parser = new RSSParser();
-        let feed = await parser.parseURL(res.feed);
-        feed.items.forEach(fillFeed);
-    } else if (res.feedMode === "fever") {
-        let items = (await feverRequest(
-            res.fever.endpoint,
-            res.fever.api_key,
-            "items"
-        )).items;
-        items.reverse().filter(item => !item.is_read).forEach(fillFeed);
-    }
+    let parser = new RSSParser();
+    let feed = await parser.parseURL(res.feed);
+    feed.items.forEach(fillFeed.bind(null, res.feedMode));
 }
 
 document.addEventListener("DOMContentLoaded", main);
+document.addEventListener("contextmenu", e => e.preventDefault()); // suppress context menu

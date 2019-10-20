@@ -33,18 +33,6 @@ function save() {
             api_key: fever_api_key.value
         }
     });
-    switch (feedMode.value) {
-        case "rss":
-            fever_endpoint.disabled = true;
-            fever_api_key.disabled = true;
-            feed.disabled = false;
-            break;
-        case "fever":
-            fever_endpoint.disabled = false;
-            fever_api_key.disabled = false;
-            feed.disabled = true;
-            break;
-    }
 }
 
 document.addEventListener("DOMContentLoaded", load);
