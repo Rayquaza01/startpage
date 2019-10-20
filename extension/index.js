@@ -1,5 +1,7 @@
 /* globals moment RSSParser */
-const feedEle = document.getElementById("feed");
+const $ = q => document.querySelector(q);
+const hasProperty = (obj, prop) => Object.prototype.hasOwnProperty.call(obj, prop);
+const feedEle = $("#feed");
 
 function changeColor(colors) {
     document.body.style.backgroundColor =
@@ -11,7 +13,7 @@ function fillFeed(item) {
     name.className = "item";
     name.href = item.link;
     name.innerText = item.title;
-    if (item.hasOwnProperty("creator")) {
+    if (hasProperty(item, "creator")) {
         name.innerText += " • " + item.creator;
     }
 
@@ -19,42 +21,16 @@ function fillFeed(item) {
 }
 
 function changeTime(time, date) {
-    document.getElementById("t").innerText = moment().format(time);
-    document.getElementById("d").innerText = moment().format(date);
-}
-
-async function getOpt(opt) {
-    if (window.hasOwnProperty("browser")) {
-        let res = await browser.storage.local.get(opt);
-        return res[opt];
-    } else {
-        if (["colors", "shuffle"].includes(opt)) {
-            return JSON.parse(localStorage[opt]);
-        } else {
-            return localStorage[opt];
-        }
-    }
+    $("#t").innerText = moment().format(time);
+    $("#d").innerText = moment().format(date);
 }
 
 async function main() {
-    // for web demo
-    if (!window.hasOwnProperty("browser")) {
-        console.log("WEB DEMO");
-        console.log("Change settings in browser console");
-        console.log("Ex: localStorage.feed = 'https://reddit.com/r/popular/.rss'");
-        let storage = await (await fetch("options.json")).json();
-        if (localStorage !== null) {
-            localStorage.colors = JSON.stringify(storage.colors);
-            localStorage.feed = storage.feed;
-            localStorage.date = storage.date;
-            localStorage.time = storage.time;
-            localStorage.shuffle = storage.shuffle;
-        }
-    }
+    let res = await browser.storage.local.get();
 
     // set color
-    let colors = await getOpt("colors");
-    let shuffle = await getOpt("shuffle");
+    let colors = res.colors;
+    let shuffle = res.shuffle;
     changeColor(colors);
     // change color every 5s if shuffle is enabled
     if (shuffle) {
@@ -63,19 +39,15 @@ async function main() {
     }
 
     // change time
-    let date = await getOpt("date");
-    let time = await getOpt("time");
+    let date = res.date;
+    let time = res.time;
     changeTime(time, date);
     setInterval(changeTime.bind(null, time, date), 1000);
 
     // get rss feed
     let parser = new RSSParser();
-    // use cors proxy on web demo
-    let CORS = !window.hasOwnProperty("browser")
-        ? "https://cors-anywhere.herokuapp.com/"
-        : "";
-    let feedURL = await getOpt("feed");
-    let feed = await parser.parseURL(CORS + feedURL);
+    let feedURL = res.feed;
+    let feed = await parser.parseURL(feedURL);
     feed.items.forEach(fillFeed);
 }
 

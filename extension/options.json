@@ -15,7 +15,12 @@
         "#607D8B"
     ],
     "shuffle": false,
-    "feed": "https://reddit.com/r/popular/.rss",
     "time": "hh:mm A",
-    "date": "dddd, MMMM Do, YYYY"
+    "date": "dddd, MMMM Do, YYYY",
+    "feed": "https://reddit.com/r/popular/.rss",
+    "feedMode": "rss",
+    "fever": {
+        "endpoint": "",
+        "api_key": ""
+    }
 }
