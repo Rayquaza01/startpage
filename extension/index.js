@@ -8,13 +8,35 @@ function changeColor(colors) {
         colors[Math.floor(Math.random() * colors.length)];
 }
 
+async function markReadAndOpenFever(e) {
+    let res = await browser.storage.local.get("fever");
+    await feverRequest(
+        res.fever.endpoint,
+        res.fever.api_key,
+        "mark=item&as=read&id=" + e.target.dataset.id
+    );
+    location.href = e.target.dataset.url;
+}
+
 function fillFeed(item) {
     let name = document.createElement("a");
-    name.className = "item";
-    name.href = item.link;
-    name.innerText = item.title;
-    if (hasProperty(item, "creator")) {
-        name.innerText += " • " + item.creator;
+
+    if (hasProperty(item, "feed_id")) {
+        name.className = "item";
+        name.dataset.id = item.id;
+        name.dataset.url = item.url;
+        name.innerText = item.title;
+        if (item.author !== "") {
+            name.innerText += " • " + item.author.substring(1);
+        }
+        name.addEventListener("click", markReadAndOpenFever);
+    } else {
+        name.className = "item";
+        name.href = item.link;
+        name.innerText = item.title;
+        if (hasProperty(item, "creator")) {
+            name.innerText += " • " + item.creator;
+        }
     }
 
     feedEle.appendChild(name);
@@ -23,6 +45,17 @@ function fillFeed(item) {
 function changeTime(time, date) {
     $("#t").innerText = moment().format(time);
     $("#d").innerText = moment().format(date);
+}
+
+async function feverRequest(endpoint, api_key, args) {
+    let response = await fetch(endpoint + "?api&" + args, {
+        body: "api_key=" + api_key,
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        method: "post"
+    });
+    return await response.json();
 }
 
 async function main() {
@@ -45,10 +78,18 @@ async function main() {
     setInterval(changeTime.bind(null, time, date), 1000);
 
     // get rss feed
-    let parser = new RSSParser();
-    let feedURL = res.feed;
-    let feed = await parser.parseURL(feedURL);
-    feed.items.forEach(fillFeed);
+    if (res.feedMode === "rss") {
+        let parser = new RSSParser();
+        let feed = await parser.parseURL(res.feed);
+        feed.items.forEach(fillFeed);
+    } else if (res.feedMode === "fever") {
+        let items = (await feverRequest(
+            res.fever.endpoint,
+            res.fever.api_key,
+            "items"
+        )).items;
+        items.reverse().filter(item => !item.is_read).forEach(fillFeed);
+    }
 }
 
 document.addEventListener("DOMContentLoaded", main);
