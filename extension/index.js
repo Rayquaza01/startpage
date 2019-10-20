@@ -50,6 +50,7 @@ function fillFeed(mode = "rss", item) {
         name.dataset.freshrssId = item.guid;
     }
     name.addEventListener("mouseup", openItem);
+    name.addEventListener("contextmenu", e => e.preventDefault());
 
     feedEle.appendChild(name);
 }
@@ -96,4 +97,3 @@ async function main() {
 }
 
 document.addEventListener("DOMContentLoaded", main);
-document.addEventListener("contextmenu", e => e.preventDefault()); // suppress context menu
