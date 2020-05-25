@@ -4,31 +4,23 @@
   "description": "A startpage.   [Video Demo](https://www.youtube.com/watch?v=Sf7xl_V9sr0), [Web Demo](https://Rayquaza01.github.io/startpage)",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --config webpack.config.js",
-    "run": "web-ext run -s ./extension",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Rayquaza01/startpage.git"
   },
-  "keywords": [],
-  "author": "",
+  "author": "Rayquaza01",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Rayquaza01/startpage/issues"
   },
   "homepage": "https://github.com/Rayquaza01/startpage#readme",
   "devDependencies": {
-    "eslint": "^6.7.2",
-    "prettier": "^1.19.1",
-    "web-ext": "^3.2.1",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10"
-  },
-  "dependencies": {
-    "moment": "^2.24.0",
-    "rss-parser": "^3.7.3",
-    "underscore": "^1.9.1"
+    "eslint": "^7.1.0",
+    "prettier": "^2.0.5",
+    "web-ext": "^4.2.0",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11"
   }
 }
