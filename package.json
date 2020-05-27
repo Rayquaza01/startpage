@@ -4,7 +4,8 @@
   "description": "A startpage.   [Video Demo](https://www.youtube.com/watch?v=Sf7xl_V9sr0), [Web Demo](https://Rayquaza01.github.io/startpage)",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:dev": "./scripts/build-dev.sh",
+    "build": "./scripts/build-prod.sh"
   },
   "repository": {
     "type": "git",
@@ -19,6 +20,7 @@
   "devDependencies": {
     "eslint": "^7.1.0",
     "prettier": "^2.0.5",
+    "svg-inline-loader": "^0.8.2",
     "web-ext": "^4.2.0",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11"
