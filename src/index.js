@@ -1,40 +1,99 @@
-// import Fever from "./Fever.js";
-import { insertSVG } from "./SVG.js";
+/* globals moment RSSParser */
+const $ = q => document.querySelector(q);
+const hasProperty = (obj, prop) => Object.prototype.hasOwnProperty.call(obj, prop);
+const feedEle = $("#feed");
 
-const DOM = {
-    drawer: document.querySelector("#drawer"),
-    close: document.querySelector("#close"),
-    settings: document.querySelector("#settings"),
-    name: document.querySelector("#name")
-};
-
-function closeDrawer() {
-    DOM.drawer.classList.remove("active");
+function changeColor(colors) {
+    document.body.style.backgroundColor =
+        colors[Math.floor(Math.random() * colors.length)];
 }
 
-function openDrawer() {
-    DOM.drawer.classList.add("active");
+async function openItem(e) {
+    if (hasProperty(e.target.dataset, "freshrssId")) {
+        await markRead(e.target.dataset.freshrssId);
+    }
+    switch (e.which) {
+        case 1:
+            location.href = e.target.dataset.url;
+            break;
+        case 2:
+            browser.tabs.create({
+                url: e.target.dataset.url,
+                active: true
+            });
+            break;
+    }
+    e.target.remove();
 }
 
-function openSettings() {
-    DOM.name.innerText = "Settings";
-    openDrawer();
+async function markRead(id) {
+    let res = await browser.storage.local.get("fever");
+    await feverRequest(
+        res.fever.endpoint,
+        res.fever.api_key,
+        "mark=item&as=read&id=" + id
+    );
+}
+
+function fillFeed(mode = "rss", item) {
+    let name = document.createElement("div");
+
+    name.className = "item";
+    name.innerText = item.title;
+    name.dataset.url = item.link;
+    name.title = item.link;
+    name.href = "#";
+    if (hasProperty(item, "creator")) {
+        name.innerText += " • " + item.creator;
+    }
+    if (mode === "freshrss") {
+        name.dataset.freshrssId = item.guid;
+    }
+    name.addEventListener("mouseup", openItem);
+    name.addEventListener("contextmenu", e => e.preventDefault());
+
+    feedEle.appendChild(name);
+}
+
+function changeTime(time, date) {
+    $("#t").innerText = moment().format(time);
+    $("#d").innerText = moment().format(date);
+}
+
+async function feverRequest(endpoint, api_key, args) {
+    let response = await fetch(endpoint + "?api&" + args, {
+        body: "api_key=" + api_key,
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        method: "post"
+    });
+    return await response.json();
 }
 
 async function main() {
-    insertSVG();
+    let res = await browser.storage.local.get();
 
-    // let fever = new Fever(
-    //     "",
-    //     ""
-    // );
-    // console.log(await fever.auth());
-    // console.log(await fever.groups());
-    // const { unread_item_ids: unread } = await fever.unread();
-    // const { items } = await fever.items(null, null, unread);
-    // console.log(items);
+    // set color
+    let colors = res.colors;
+    let shuffle = res.shuffle;
+    changeColor(colors);
+    // change color every 5s if shuffle is enabled
+    if (shuffle) {
+        setInterval(changeColor.bind(null, colors), 5000);
+        document.body.style.transition = "5s";
+    }
+
+    // change time
+    let date = res.date;
+    let time = res.time;
+    changeTime(time, date);
+    setInterval(changeTime.bind(null, time, date), 1000);
+
+    // get rss feed
+    let parser = new RSSParser();
+    let feed = await parser.parseURL(res.feed);
+    feed.items.forEach(fillFeed.bind(null, res.feedMode));
 }
 
-DOM.settings.addEventListener("click", openSettings);
-DOM.close.addEventListener("click", closeDrawer);
 document.addEventListener("DOMContentLoaded", main);

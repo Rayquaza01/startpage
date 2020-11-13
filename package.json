@@ -4,8 +4,15 @@
   "description": "A startpage.   [Video Demo](https://www.youtube.com/watch?v=Sf7xl_V9sr0), [Web Demo](https://Rayquaza01.github.io/startpage)",
   "main": "index.js",
   "scripts": {
-    "build:dev": "./scripts/build-dev.sh",
-    "build": "./scripts/build-prod.sh"
+    "clean": "mkdir -p dist && rm -rf dist/*",
+    "build:bundle": "parcel build src/**/*.html src/background.ts",
+    "build:assets": "cpx src/**/*.{json,rss,svg} dist",
+    "build:extension": "web-ext build -s dist --overwrite-destination",
+    "build:complete": "run-s clean build:assets build:bundle build:extension",
+    "watch:bundle": "parcel watch src/**/*.html src/background.ts --no-autoinstall --no-hmr",
+    "watch:assets": "cpx src/**/*.{json,rss,svg} dist -w",
+    "watch:extension": "npm-run-all clean -p watch:assets watch:extension",
+    "firefox": "web-ext run -s dist"
   },
   "repository": {
     "type": "git",
@@ -17,12 +24,11 @@
     "url": "https://github.com/Rayquaza01/startpage/issues"
   },
   "homepage": "https://github.com/Rayquaza01/startpage#readme",
-  "devDependencies": {
-    "eslint": "^7.1.0",
-    "prettier": "^2.0.5",
-    "svg-inline-loader": "^0.8.2",
-    "web-ext": "^4.2.0",
-    "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.11"
+  "dependencies": {
+    "cpx": "^1.5.0",
+    "npm-run-all": "^4.1.5",
+    "parcel-bundler": "^1.12.4",
+    "typescript": "^4.0.5",
+    "web-ext": "^5.3.0"
   }
 }
